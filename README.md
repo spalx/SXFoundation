@@ -27,19 +27,24 @@ SXFoundation is a C++ framework heavily influenced by Objective-C's manual memor
 ### Memory management example
 
 ```cpp
-// pStr1 has a reference count of 1 and is not in the autorelease pool, so we are the owners of that object and we must release it manually.
+// pStr1 has a reference count of 1 and is not in the autorelease pool.
+// We are the owners of that object and we must release it manually.
 SXString* pStr1 = new SXString("Hello,");
 
-// pStr2 has a reference count of 1 but it's in the autorelease pool, so we are not allowed to release it, will be automatically released when the pool is drained.
+// pStr2 has a reference count of 1 but it's in the autorelease pool
+// We are not allowed to release it.
+// It will be automatically released when the pool is drained.
 SXString* pStr2 = SXString::create("World!");
 
 // Prints "Hello, World!" in the console.
 SXLog("%s %s", pStr1->getCString(), pStr2->getCString());
 
-// Calling release to free memory used by the string that we created by using new operator.
+// Calling release to free memory used by the string.
+// The string was created by using the new operator.
 pStr1->release();
 
-// Delete all pools and call release() on each one of the objects inside them. Calling this method is a must and it should be done only at the end of the program.
+// Delete all pools and call release() on each one of the objects inside them.
+// Calling this method is a must and should be done only at the end.
 SXPoolManager::purgePoolManager();
 ```
 
@@ -52,16 +57,20 @@ Autorelease pools are used to release memory used by objects marked with the aut
 // pStr1 is created in the main pool.
 SXString* pStr1 = SXString::create("Hello,");
 
-// We create a new pool and push it to the top of the stack, so starting from here, this is the active pool.
+// We create a new pool and push it to the top of the stack.
+// Starting from here, this is the active pool.
 SXPoolManager::sharedPoolManager()->push();
 
 // pStr2 goes to the second (active) pool.
 SXString* pStr2 = SXString::create("World!");
 
-// Pop the active (second) pool. pStr2 will be released after this call.
+// Pop the active (second) pool.
+// pStr2 will be released after this call.
 SXPoolManager::sharedPoolManager()->pop();
 
-// pStr1 will only be released when purgePoolManager() is called, since it was created in the first pool (which was created by the pool manager).
+// pStr1 will only be released when purgePoolManager() is called
+// since it was created in the first pool
+// (which was created by the pool manager).
 SXPoolManager::purgePoolManager();
 ```
 
@@ -103,7 +112,8 @@ const char* pCStr = pStr->getCString(); // Get C-style string value.
 SXNumber<int>* pNum = SXNumber<int>::create(10); // Create a number.
 int num = pNum->getValue(); // Get numeric value.
 
-SXData* pData = SXData::createWithContentsOfFile("file1.jpg"); // Create a data object from the contents of a file.
+// Create a data object from the contents of a file.
+SXData* pData = SXData::createWithContentsOfFile("file1.jpg");
 if (pData) {
     pData->writeToFile("file2.jpg"); // Write the bytes to another file.
 }
@@ -114,19 +124,27 @@ SXSelector is a simple polymorphic function wrapper. Since it's subclassing SXOb
 
 ### Examples
 ```cpp
-// In all the examples below, the function is receiving one SXDictionary* as argument and returning void. But that's just an example, you can modify both the arguments and the return type.
+// In all the examples below, the function is
+// receiving one SXDictionary* as argument and
+// returning void. But that's just an example,
+// you can modify both the arguments and the return type.
 
 // Creating a selector using lambda notation.
-SXSelector<void(SXDictionary*)>* pSelector1 = new SXSelector<void(SXDictionary*)>([](SXDictionary* dict) {
+SXSelector<void(SXDictionary*)>* pSelector1 = 
+new SXSelector<void(SXDictionary*)>([](SXDictionary* dict) {
     myCallback(dict);
 });
 
 // Creating a seletor by just passing the reference of the function.
-SXSelector<void(SXDictionary*)>* pSelector2 = new SXSelector<void(SXDictionary*)>(&myCallback);
+SXSelector<void(SXDictionary*)>* pSelector2 = 
+new SXSelector<void(SXDictionary*)>(&myCallback);
 
 // Creating a selector by binding an object's method
 MyClass* pObj = new MyClass();
-SXSelector<void(SXDictionary*)>* pSelector3 = new SXSelector<void(SXDictionary*)>(std::bind(&MyClass::myCallback, pObj, std::placeholders::_1));
+SXSelector<void(SXDictionary*)>* pSelector3 = 
+new SXSelector<void(SXDictionary*)>(
+    std::bind(&MyClass::myCallback, pObj, std::placeholders::_1)
+);
 ```
 
 ## The notification center
@@ -137,7 +155,8 @@ The SXNotificationCenter class is a singleton class that allows sending notifica
 SXNotificationCenter* pNotificationCenter = SXNotificationCenter::defaultCenter();
 
 // Create the seletor which will be called when the notification is received.
-SXSelector<void(SXDictionary*)>* pSelector = new SXSelector<void(SXDictionary*)>(&myCallback);
+SXSelector<void(SXDictionary*)>* pSelector = 
+new SXSelector<void(SXDictionary*)>(&myCallback);
 
 // Register the selector for notifications named "notification_name"
 pNotificationCenter->addObserver(pSelector, "notification_name");
@@ -145,7 +164,8 @@ pNotificationCenter->addObserver(pSelector, "notification_name");
 // (Optional) Create a dictionary to pass to the callback as extra information.
 SXDictionary* pInfo = SXDictionary::create();
 
-// Post a notification called "notification_name" (will trigger the selector registered as observer).
+// Post a notification called "notification_name"
+// (will trigger the selector registered as observer).
 pNotificationCenter->postNotification("notification_name", pInfo);
 ```
 
